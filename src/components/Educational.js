@@ -38,18 +38,21 @@ class Educations extends React.Component {
         })
     }
 
-    update = (index, newObj) => {
-        const newEducations = [...this.state.educations]
-        newEducations[index] = newObj
+    update = (id, newObj) => {
+        const newEducations = this.state.educations.map(x => {
+            if (x.id === id) {
+                return { id, ...newObj }
+            }
+            return x
+        })
         this.setState({
             dirty: true,
             educations: newEducations
         })
     }
 
-    delete = (index) => {
-        const newEducations = [...this.state.educations]
-        newEducations.splice(index, 1)
+    delete = (id) => {
+        const newEducations = this.state.educations.filter(x => x.id !== id)
         this.setState({
             dirty: true,
             educations: newEducations
@@ -61,10 +64,10 @@ class Educations extends React.Component {
         return (
             <div>
                 <div>
-                    {this.state.educations.map((x, index) =>
-                        <Education name={x.name} title={x.title} date={x.date}
-                            delete={() => this.delete(index)}
-                            update={(newObj) => this.update(index, newObj)} />)}
+                    {this.state.educations.map((x) =>
+                        <Education key={x.id} id={x.id} name={x.name} title={x.title} date={x.date}
+                            delete={this.delete}
+                            update={this.update} />)}
                 </div>
                 <div>
                     <button onClick={this.onAddClick} > <FontAwesomeIcon icon={faPlusCircle} /> Add</button>
@@ -90,7 +93,7 @@ class Education extends React.Component {
 
     onClick = () => {
         if (this.state.editMode) {
-            this.props.update(this.state)
+            this.props.update(this.props.id, this.state)
         }
         this.setState({
             editMode: !this.state.editMode
@@ -117,12 +120,12 @@ class Education extends React.Component {
     }
 
     onDelete = () => {
-        this.props.delete()
+        this.props.delete(this.props.id)
     }
 
     render = () => {
         return (
-            <div key={this.props.id}>
+            <div>
                 <div><b>Name: </b> {this.state.editMode ? <input value={this.state.name} onChange={this.onNameChange} /> : this.state.name}</div>
                 <div><b>Title: </b> {this.state.editMode ? <input value={this.state.title} onChange={this.onTitleChange} /> : this.state.title}</div>
                 <div><b>Date: </b> {this.state.editMode ? <input type="date" value={this.state.date} onChange={this.onDateChange} /> : this.state.date}</div>

@@ -1,54 +1,41 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencilAlt, faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
 
 
-class GeneralInfo extends React.Component {
-    constructor(props) {
-        super(props)
+const GeneralInfo = (props) => {
 
-        const firstName = localStorage.getItem('first_name') || ''
-        const lastName = localStorage.getItem('last_name') || ''
+    const _firstName = localStorage.getItem('first_name') || ''
+    const _lastName = localStorage.getItem('last_name') || ''
 
-        this.state = {
-            firstName,
-            lastName,
-            editMode: false,
-        }
-    }
+    const [firstName, setFirstName] = useState(_firstName)
+    const [lastName, setLastName] = useState(_lastName)
+    const [editMode, setEditMode] = useState(false)
 
-    onClick = () => {
-        if (this.state.editMode) {
+    const onClick = () => {
+        if (editMode) {
             //save
-            localStorage.setItem('first_name', this.state.firstName)
-            localStorage.setItem('last_name', this.state.lastName)
+            localStorage.setItem('first_name', firstName)
+            localStorage.setItem('last_name', lastName)
         }
-        this.setState({
-            editMode: !this.state.editMode
-        })
+        setEditMode(!editMode)
     }
 
-    onChangeFirstName = (e) => {
-        this.setState({
-            firstName: e.target.value
-        })
+    const onChangeFirstName = (e) => {
+        setFirstName(e.target.value)
     }
 
-    onChangeLastName = (e) => {
-        this.setState({
-            lastName: e.target.value
-        })
+    const onChangeLastName = (e) => {
+        setLastName(e.target.value)
     }
 
-    render = () => {
-        return (
-            <div>
-                <div> <b>First Name: </b>{this.state.editMode ? <input value={this.state.firstName} onChange={this.onChangeFirstName}></input> : this.state.firstName}</div>
-                <div> <b>Last Name: </b>{this.state.editMode ? <input value={this.state.lastName} onChange={this.onChangeLastName}></input> : this.state.lastName}</div>
-                <div><button onClick={this.onClick}> <FontAwesomeIcon icon={this.state.editMode ? faFloppyDisk : faPencilAlt} /> {this.state.editMode ? 'Save' : 'Edit'}</button></div>
-            </div>
-        )
-    }
+    return (
+        <div>
+            <div> <b>First Name: </b>{editMode ? <input value={firstName} onChange={onChangeFirstName}></input> : firstName}</div>
+            <div> <b>Last Name: </b>{editMode ? <input value={lastName} onChange={onChangeLastName}></input> : lastName}</div>
+            <div><button onClick={onClick}> <FontAwesomeIcon icon={editMode ? faFloppyDisk : faPencilAlt} /> {editMode ? 'Save' : 'Edit'}</button></div>
+        </div>
+    )
 }
 
 export { GeneralInfo }
