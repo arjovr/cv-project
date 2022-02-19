@@ -1,23 +1,19 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPlusCircle, faFloppyDisk, faPencilAlt, faTrash } from '@fortawesome/free-solid-svg-icons'
 import uniqid from 'uniqid';
 
-class Educations extends React.Component {
-    constructor() {
-        super()
+const Educations = () => {
+    let _educations = localStorage.getItem('educations') || '[]'
+    _educations = JSON.parse(_educations)
 
-        let educations = localStorage.getItem('educations') || '[]'
-        educations = JSON.parse(educations)
+    const [educations, setEducations] = useState(_educations)
+    const [dirty, setDirty] = useState(false)
 
-        this.state = {
-            dirty: false,
-            educations: educations
-        }
-    }
 
-    onAddClick = () => {
-        const newEducations = [...this.state.educations]
+
+    const onAddClick = () => {
+        const newEducations = [...educations]
         newEducations.push({
             id: uniqid(),
             name: '',
@@ -25,121 +21,100 @@ class Educations extends React.Component {
             date: '',
             editMode: true,
         })
-        this.setState({
-            dirty: true,
-            educations: newEducations
-        })
+        setDirty(true)
+        setEducations(newEducations)
     }
 
-    save = () => {
-        localStorage.setItem('educations', JSON.stringify(this.state.educations))
-        this.setState({
-            dirty: false
-        })
+    const save = () => {
+        localStorage.setItem('educations', JSON.stringify(educations))
+        setDirty(false)
     }
 
-    update = (id, newObj) => {
-        const newEducations = this.state.educations.map(x => {
+    const update = (id, newObj) => {
+        const newEducations = educations.map(x => {
             if (x.id === id) {
                 return { id, ...newObj }
             }
             return x
         })
-        this.setState({
-            dirty: true,
-            educations: newEducations
-        })
+        setDirty(true)
+        setEducations(newEducations)
     }
 
-    delete = (id) => {
-        const newEducations = this.state.educations.filter(x => x.id !== id)
-        this.setState({
-            dirty: true,
-            educations: newEducations
-        })
+    const _delete = (id) => {
+        const newEducations = educations.filter(x => x.id !== id)
+        setDirty(true)
+        setEducations(newEducations)
     }
 
 
-    render = () => {
-        return (
+    return (
+        <div>
             <div>
-                <div>
-                    {this.state.educations.map((x) =>
-                        <Education key={x.id} id={x.id} name={x.name} title={x.title} date={x.date}
-                            delete={this.delete}
-                            update={this.update} />)}
-                </div>
-                <div>
-                    <button onClick={this.onAddClick} > <FontAwesomeIcon icon={faPlusCircle} /> Add</button>
-                    {this.state.dirty ? <button onClick={this.save}> <FontAwesomeIcon icon={faFloppyDisk} /> Save</button> : ''}
-                </div>
-            </div >
-        )
-    }
+                {educations.map((x) =>
+                    <Education key={x.id} id={x.id} name={x.name} title={x.title} date={x.date}
+                        delete={_delete}
+                        update={update} />)}
+            </div>
+            <div>
+                <button onClick={onAddClick} > <FontAwesomeIcon icon={faPlusCircle} /> Add</button>
+                {dirty ? <button onClick={save}> <FontAwesomeIcon icon={faFloppyDisk} /> Save</button> : ''}
+            </div>
+        </div >
+    )
 }
 
 
-class Education extends React.Component {
-    constructor(props) {
-        super(props)
+const Education = (props) => {
 
-        this.state = {
-            editMode: props.editMode || false,
-            title: props.title,
-            name: props.name,
-            date: props.date
+    const [editMode, setEditMode] = useState(props.editMode || false)
+    const [title, setTitle] = useState(props.title)
+    const [name, setName] = useState(props.name)
+    const [date, setDate] = useState(props.date)
+
+    const onClick = () => {
+        if (editMode) {
+            props.update(props.id, {
+                name,
+                title,
+                date,
+            })
         }
-    }
-
-    onClick = () => {
-        if (this.state.editMode) {
-            this.props.update(this.props.id, this.state)
-        }
-        this.setState({
-            editMode: !this.state.editMode
-        })
+        setEditMode(!editMode)
 
     }
 
-    onNameChange = (e) => {
-        this.setState({
-            name: e.target.value
-        })
+    const onNameChange = (e) => {
+        setName(e.target.value)
     }
 
-    onTitleChange = (e) => {
-        this.setState({
-            title: e.target.value
-        })
+    const onTitleChange = (e) => {
+        setTitle(e.target.value)
     }
 
-    onDateChange = (e) => {
-        this.setState({
-            date: e.target.value
-        })
+    const onDateChange = (e) => {
+        setDate(e.target.value)
     }
 
-    onDelete = () => {
-        this.props.delete(this.props.id)
+    const onDelete = () => {
+        props.delete(props.id)
     }
 
-    render = () => {
-        return (
+    return (
+        <div>
+            <div><b>Name: </b> {editMode ? <input value={name} onChange={onNameChange} /> : name}</div>
+            <div><b>Title: </b> {editMode ? <input value={title} onChange={onTitleChange} /> : title}</div>
+            <div><b>Date: </b> {editMode ? <input type="date" value={date} onChange={onDateChange} /> : date}</div>
             <div>
-                <div><b>Name: </b> {this.state.editMode ? <input value={this.state.name} onChange={this.onNameChange} /> : this.state.name}</div>
-                <div><b>Title: </b> {this.state.editMode ? <input value={this.state.title} onChange={this.onTitleChange} /> : this.state.title}</div>
-                <div><b>Date: </b> {this.state.editMode ? <input type="date" value={this.state.date} onChange={this.onDateChange} /> : this.state.date}</div>
-                <div>
-                    <button onClick={this.onClick}>
-                        <FontAwesomeIcon icon={this.state.editMode ? faFloppyDisk : faPencilAlt} /> {this.state.editMode ? 'Save' : 'Edit'}
-                    </button>
-                    <button onClick={this.onDelete}>
-                        <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                </div>
+                <button onClick={onClick}>
+                    <FontAwesomeIcon icon={editMode ? faFloppyDisk : faPencilAlt} /> {editMode ? 'Save' : 'Edit'}
+                </button>
+                <button onClick={onDelete}>
+                    <FontAwesomeIcon icon={faTrash} />
+                </button>
             </div>
-        )
-    }
+        </div>
+    )
 }
 
 export { Educations }
